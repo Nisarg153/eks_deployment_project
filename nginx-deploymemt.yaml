@@ -34,7 +34,7 @@ spec:
    - port: 80
      targetPort: 80
      protocol: TCP 
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: nginx
 --- 
@@ -46,6 +46,7 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/subnets: subnet-04700bc3918ad3466, subnet-0ebb19662f353a1a3
 spec: 
   ingressClassName: alb
   rules:

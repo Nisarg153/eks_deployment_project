@@ -42,9 +42,10 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   tags = {
-    Name = "${var.project_prefix}-${var.region}-public-${count.index + 1}"
+        Name = "${var.project_prefix}-${var.region}-public-${count.index + 1}"
+    }
   }
-}
+
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
@@ -83,13 +84,13 @@ resource "aws_route_table" "private" {
   count  = length(aws_subnet.private)
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "${var.project_prefix}-${var.region}-private-rt"
+    Name = "${var.project_prefix}-${var.region}-private-rt-${count.index + 1}"
   }
 }
 
 resource "aws_eip" "nat" {
-  count = 2
-  vpc   = true
+  count  = 2
+  domain = "vpc"
   tags = {
     Name = "${var.project_prefix}-${var.region}-nat-eip-${count.index + 1}"
   }
@@ -211,6 +212,19 @@ resource "aws_eks_cluster" "eks_cluster" {
   tags = {
     Name = "${var.project_prefix}-${var.region}-eks-cluster"
   }
+}
+
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "vpc-cni"
+}
+resource "aws_eks_addon" "kube_proxy" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "kube-proxy"
+}
+resource "aws_eks_addon" "coredns" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "coredns"
 }
 
 resource "aws_eks_node_group" "node_group" {
